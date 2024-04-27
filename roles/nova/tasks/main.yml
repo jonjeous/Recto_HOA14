@@ -79,9 +79,9 @@
   become: true
   command: nova-manage cell_v2 map_cell0
 
-- name: Create cell2 cell
+- name: Create cell1 cell
   become: true
-  command: nova-manage cell_v2 create_cell --name=cell2
+  command: nova-manage cell_v2 create_cell --name=cell1
 
 - name: Populate nova database
   become: true
