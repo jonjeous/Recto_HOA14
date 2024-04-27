@@ -1,0 +1,103 @@
+---
+- name: Install Nova packages
+  become: true
+  package:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - nova-api
+    - nova-conductor
+    - nova-novncproxy
+    - nova-scheduler
+
+- name: Edit nova.conf file
+  become: true
+  blockinfile:
+    path: /etc/nova/nova.conf
+    block: |
+      [api_database]
+      connection = mysql+pymysql://nova:NOVA_DBPASS@localhost/nova_api
+
+      [database]
+      connection = mysql+pymysql://nova:NOVA_DBPASS@localhost/nova
+
+      [DEFAULT]
+      transport_url = rabbit://openstack:RABBIT_PASS@localhost:5672/
+      my_ip = 192.168.56.128
+
+      [api]
+      auth_strategy = keystone
+
+      [keystone_authtoken]
+      www_authenticate_uri = http://localhost:5000/
+      auth_url = http://localhost:5000/
+      memcached_servers = localhost:11211
+      auth_type = password
+      project_domain_name = Default
+      user_domain_name = Default
+      project_name = service
+      username = nova
+      password = NOVA_PASS
+
+      [service_user]
+      send_service_user_token = true
+      auth_url = https://localhost/identity
+      auth_strategy = keystone
+      auth_type = password
+      project_domain_name = Default
+      project_name = service
+      user_domain_name = Default
+      username = nova
+      password = NOVA_PASS
+
+      [vnc]
+      enabled = true
+      server_listen = $my_ip
+      server_proxyclient_address = $my_ip
+
+      [glance]
+      api_servers = http://localhost:9292
+
+      [oslo_concurrency]
+      lock_path = /var/lib/nova/tmp
+
+      [placement]
+      region_name = RegionOne
+      project_domain_name = Default
+      project_name = service
+      auth_type = password
+      user_domain_name = Default
+      auth_url = http://localhost:5000/v3
+      username = placement
+      password = PLACEMENT_PASS
+
+- name: Populate nova-api database
+  become: true
+  command: nova-manage api_db sync
+
+- name: Register cell0 database
+  become: true
+  command: nova-manage cell_v2 map_cell0
+
+- name: Create cell2 cell
+  become: true
+  command: nova-manage cell_v2 create_cell --name=cell2
+
+- name: Populate nova database
+  become: true
+  command: nova-manage db sync
+
+- name: Verify cell registration
+  become: true
+  command: nova-manage cell_v2 list_cells
+
+- name: Restart Compute services
+  become: true
+  systemd:
+    name: "{{ item }}"
+    state: restarted
+  loop:
+    - nova-api
+    - nova-scheduler
+    - nova-conductor
+    - nova-novncproxy
