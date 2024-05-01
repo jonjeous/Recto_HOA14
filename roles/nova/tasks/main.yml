@@ -16,39 +16,39 @@
     path: /etc/nova/nova.conf
     block: |
       [api_database]
-      connection = mysql+pymysql://nova:NOVA_DBPASS@localhost/nova_api
+      connection = mysql+pymysql://nova:password@controller/nova_api
 
       [database]
-      connection = mysql+pymysql://nova:NOVA_DBPASS@localhost/nova
+      connection = mysql+pymysql://nova:password@controller/nova
 
       [DEFAULT]
-      transport_url = rabbit://openstack:RABBIT_PASS@localhost:5672/
-      my_ip = 192.168.56.128
+      transport_url = rabbit://openstack:password@controller:5672/
+      my_ip = 192.168.56.133
 
       [api]
       auth_strategy = keystone
 
       [keystone_authtoken]
-      www_authenticate_uri = http://localhost:5000/
-      auth_url = http://localhost:5000/
-      memcached_servers = localhost:11211
+      www_authenticate_uri = http://controller:5000/v3
+      auth_url = http://controller:5000/v3
+      memcached_servers = controller:11211
       auth_type = password
       project_domain_name = Default
       user_domain_name = Default
       project_name = service
       username = nova
-      password = NOVA_PASS
+      password = password
 
       [service_user]
       send_service_user_token = true
-      auth_url = https://localhost/identity
+      auth_url = https://controller/identity
       auth_strategy = keystone
       auth_type = password
       project_domain_name = Default
       project_name = service
       user_domain_name = Default
       username = nova
-      password = NOVA_PASS
+      password = password
 
       [vnc]
       enabled = true
@@ -56,7 +56,7 @@
       server_proxyclient_address = $my_ip
 
       [glance]
-      api_servers = http://localhost:9292
+      api_servers = http://controller:9292
 
       [oslo_concurrency]
       lock_path = /var/lib/nova/tmp
@@ -67,9 +67,9 @@
       project_name = service
       auth_type = password
       user_domain_name = Default
-      auth_url = http://localhost:5000/v3
+      auth_url = http://controller:5000/v3
       username = placement
-      password = PLACEMENT_PASS
+      password = controller
 
 - name: Populate nova-api database
   become: true
@@ -101,3 +101,4 @@
     - nova-scheduler
     - nova-conductor
     - nova-novncproxy
+

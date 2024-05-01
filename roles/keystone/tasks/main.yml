@@ -8,8 +8,8 @@
   lineinfile:
     dest: /etc/keystone/keystone.conf
     insertafter: '\[database\]'
-    regexp: 'connection = mysql+pymysql://keystone:KEYSTONE_DBPASS@localhost/keystone'
-    line: 'connection = mysql+pymysql://keystone:admin123@localhost/keystone'
+    regexp: 'connection = mysql+pymysql://keystone:password@localhost/keystone'
+    line: 'connection = mysql+pymysql://keystone:password@localhost/keystone'
     backup: yes
     backrefs: yes
 
@@ -34,7 +34,7 @@
 
 - name: Bootstrap the Identity service
   shell: |
-    keystone-manage bootstrap --bootstrap-password ADMIN_PASS \
+    keystone-manage bootstrap --bootstrap-password password \
       --bootstrap-admin-url http://controller:5000/v3/ \
       --bootstrap-internal-url http://controller:5000/v3/ \
       --bootstrap-public-url http://controller:5000/v3/ \
@@ -55,7 +55,7 @@
 - name: Configure Administrative Account Environmental Variables
   shell:
     export OS_USERNAME=admin
-    export OS_PASSWORD=ADMIN_PASS
+    export OS_PASSWORD=password
     export OS_PROJECT_NAME=admin
     export OS_USER_DOMAIN_NAME=Default
     export OS_PROJECT_DOMAIN_NAME=Default
