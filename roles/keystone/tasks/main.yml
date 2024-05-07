@@ -8,8 +8,8 @@
   lineinfile:
     dest: /etc/keystone/keystone.conf
     insertafter: '\[database\]'
-    regexp: 'connection = mysql+pymysql://keystone:password@localhost/keystone'
-    line: 'connection = mysql+pymysql://keystone:password@localhost/keystone'
+    regexp: 'connection = mysql+pymysql://keystone:password@controller/keystone'
+    line: 'connection = mysql+pymysql://keystone:password@controller/keystone'
     backup: yes
     backrefs: yes
 
@@ -43,7 +43,7 @@
 - name: Configuring the Apache (HTTP) Server
   lineinfile:
     dest: /etc/apache2/apache2.conf
-    line: 'ServerName localhost'
+    line: 'ServerName controller'
     state: present
     backup: yes
 
